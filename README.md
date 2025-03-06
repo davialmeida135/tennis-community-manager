@@ -1,2 +1,3 @@
 # TennisCommunityManager
  
+env = TennisDjango
