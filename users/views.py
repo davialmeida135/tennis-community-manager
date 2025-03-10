@@ -7,19 +7,32 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer
 
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 User = get_user_model()
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    # Add authentication and permission classes
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    # If you want to allow unauthenticated users to register
+    def get_permissions(self):
+        """Allow unauthenticated users to create a new account"""
+        if self.action in ['create', 'login']:
+            return []
+        return super().get_permissions()
 
     @action(detail=False, methods=["post"])
     def login(self, request):
         """Autentica um usuário e retorna um token."""
-        email = request.data.get("email")
+        username = request.data.get("username")
         password = request.data.get("password")
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(username=username)
             if check_password(password, user.password):
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({"token": token.key, "user_id": user.id, "username": user.username}, status=status.HTTP_200_OK)

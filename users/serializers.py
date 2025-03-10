@@ -23,6 +23,10 @@ class UserSerializer(serializers.ModelSerializer):
         profile_data = validated_data.pop("profile", {})
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+
+        if "password" in validated_data:
+            instance.set_password(validated_data["password"])
+            
         instance.save()
         # update profile if provided
         profile = instance.profile
