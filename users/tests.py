@@ -1,5 +1,6 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
+from users.models import UserProfile
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -10,9 +11,26 @@ class UserTests(APITestCase):
         self.user_data = {
             "username": "testuser",
             "email": "testuser@example.com",
-            "password": "securepassword123"
+            "password": "securepassword123",
+            "profile": {
+                "forehand": "Right",
+                "backhand": "Left",
+                "description": "Default profile description"
+            }
         }
-        self.user = User.objects.create_user(**self.user_data)
+        self.user = User.objects.create_user(
+            username=self.user_data["username"],
+            email=self.user_data["email"],
+            password=self.user_data["password"]
+        )
+        # Create the profile manually for setup
+        # (If you're not using signals to auto-create profiles)
+        self.profile = UserProfile.objects.create(
+            user=self.user,
+            forehand="Right",
+            backhand="One Handed",
+            description="Default profile description"
+        )
     
     def test_create_user(self):
         """Testa a criação de um novo usuário."""
