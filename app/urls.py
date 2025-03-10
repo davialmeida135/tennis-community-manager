@@ -20,4 +20,7 @@ from django.contrib import admin
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
+    path("api/", include("tournament.urls")),  # Include tournament endpoints
+    #path("api/", include("community.urls")),
+    # path("api/", include("scoreboard.urls")),
 ]
