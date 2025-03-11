@@ -9,4 +9,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('users/login/', views.UserViewSet.as_view({'post': 'login'}), name='login'),
     path('users/logout/', views.UserViewSet.as_view({'post': 'logout'}), name='logout'),
+    path('users/communities/', views.UserViewSet.as_view({'get': 'communities'}), name='communities'),
 ]

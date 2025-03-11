@@ -6,6 +6,9 @@ from rest_framework.decorators import action
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer
+from .models import UserProfile
+from community.models import Community, CommunityUsers
+from community.serializers import CommunitySerializer
 
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -48,3 +51,28 @@ class UserViewSet(viewsets.ModelViewSet):
             request.user.auth_token.delete()
             return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
         return Response({"error": "Not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    @action(detail=False, methods=["get"])
+    def communities(self, request):
+        """Retorna as comunidades que o usuário pertence."""
+
+        try:
+            # Verifica se o usuário existe
+            user = request.user
+            user_profile = UserProfile.objects.get(user=user)
+
+            user_profile = UserProfile.objects.get(user=user)
+            
+            # Get CommunityUsers entries
+            community_users = CommunityUsers.objects.filter(user=user_profile)
+            
+            # Extract just the communities
+            communities = [cu.community for cu in community_users]
+            
+            serializer = CommunitySerializer(communities, many=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except UserProfile.DoesNotExist:
+           return Response({"error": f"User {user} not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+           return Response({"error": str(e)+ str(user)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
