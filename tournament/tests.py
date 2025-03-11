@@ -134,46 +134,55 @@ class TournamentViewSetTests(APITestCase):
         )
         # Create two players (users and their profiles)
         self.user1 = User.objects.create_user(
+            first_name="Davi",
             username="player1",
             email="player1@test.com",
             password="pass"
         )
         self.user2 = User.objects.create_user(
+            first_name="Lucas",
             username="player2",
             email="player2@test.com",
             password="pass"
         )
         self.user3 = User.objects.create_user(
+            first_name="João",
             username="player3",
             email="player3@test.com",
             password="pass"
         )
         self.user4 = User.objects.create_user(
+            first_name="Ian",
             username="player4",
             email="player4@test.com",
             password="pass"
         )
         self.user5 = User.objects.create_user(
+            first_name="Caio",
             username="player5",
             email="player5@test.com",
             password="pass"
         )
         self.user6 = User.objects.create_user(
+            first_name="Nicolas",
             username="player6",
             email="player6@test.com",
             password="pass"
         )
         self.user7 = User.objects.create_user(
+            first_name="Jonas",
             username="player7",
             email="player7@test.com",
             password="pass"
         )
         self.user8 = User.objects.create_user(
+            first_name="Vinicius",
             username="player8",
             email="player8@test.com",
             password="pass"
         )
         self.user9 = User.objects.create_user(
+            first_name="Pedro",
             username="player9",
             email="player9@test.com",
             password="pass"
