@@ -29,10 +29,10 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"])
     def login(self, request):
         """Autentica um usuário e retorna um token."""
-        username = request.data.get("username")
+        email = request.data.get("email")
         password = request.data.get("password")
         try:
-            user = User.objects.get(username=username)
+            user = User.objects.get(email=email)
             if check_password(password, user.password):
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({"token": token.key, "user_id": user.id, "username": user.username}, status=status.HTTP_200_OK)
