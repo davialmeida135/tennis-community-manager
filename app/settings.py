@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "community",
     "tournament",
     "scoreboard",
+    'drf_yasg',
 ]
 
 REST_FRAMEWORK = {

@@ -3,3 +3,4 @@ SQLAlchemy
 django-environ
 psycopg2
 djangorestframework
+drf-yasg
