@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Tournament, TournamentPlayer, TournamentMatch
-from scoreboard.models import Match
+from matches.models import Match
 from django.contrib.auth import get_user_model
 User = get_user_model()
 

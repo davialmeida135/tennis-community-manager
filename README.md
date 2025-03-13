@@ -1,3 +1,4 @@
 # TennisCommunityManager
  
-env = TennisDjango
+# TODO
+- Testar tudo no postman

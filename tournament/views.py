@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
 from .models import Tournament, TournamentPlayer, TournamentMatch
-from scoreboard.models import Match
+from matches.models import Match
 from .serializers import TournamentSerializer, TournamentPlayerSerializer, TournamentMatchSerializer
 import random
 from .utils import seeding_order, fill_null_seeds, fit_players_in_bracket

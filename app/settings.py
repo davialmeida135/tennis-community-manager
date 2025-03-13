@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     "users",
     "community",
     "tournament",
-    "scoreboard",
+    "matches",
     'drf_yasg',
 ]
 

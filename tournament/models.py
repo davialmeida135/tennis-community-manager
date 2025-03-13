@@ -1,5 +1,5 @@
 from django.db import models
-from scoreboard.models import Match
+from matches.models import Match
 from community.models import Community
 from users.models import UserProfile
 from django.conf import settings
