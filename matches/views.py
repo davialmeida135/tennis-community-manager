@@ -3,9 +3,9 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
-from .models import Match, MatchMoment, MatchSet
-from .serializers import MatchSerializer, MatchMomentSerializer, MatchSetSerializer
-from .match import TennisMatch, Game, Set, Tiebreak
+from matches.models import Match, MatchMoment, MatchSet
+from matches.serializers import MatchSerializer
+from matches.match import TennisMatch, Game, Set, Tiebreak
 import datetime
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -193,16 +193,3 @@ class MatchViewSet(viewsets.ModelViewSet):
                 }
             }
         }, status=status.HTTP_201_CREATED)
-    
-class MatchMomentViewSet(viewsets.ModelViewSet):
-    queryset = MatchMoment.objects.all()
-    serializer_class = MatchMomentSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-
-class MatchSetViewSet(viewsets.ModelViewSet):
-    queryset = MatchSet.objects.all()
-    serializer_class = MatchSetSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
