@@ -9,6 +9,8 @@ from .serializers import UserSerializer
 from .models import UserProfile
 from community.models import Community, CommunityUsers
 from community.serializers import CommunitySerializer
+from matches.models import Match
+from matches.serializers import MatchSerializer
 
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -60,8 +62,6 @@ class UserViewSet(viewsets.ModelViewSet):
             # Verifica se o usuário existe
             user = request.user
             user_profile = UserProfile.objects.get(user=user)
-
-            user_profile = UserProfile.objects.get(user=user)
             
             # Get CommunityUsers entries
             community_users = CommunityUsers.objects.filter(user=user_profile)
@@ -76,3 +76,19 @@ class UserViewSet(viewsets.ModelViewSet):
            return Response({"error": f"User {user} not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
            return Response({"error": str(e)+ str(user)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=["get"])
+    def matches(self, request):
+        """Retorna as partidas que o usuário faz parte"""
+
+        try:
+            user = request.user
+            user_profile = UserProfile.objects.get(user=user)
+            user_matches = Match.objects.filter(home1=user_profile) | Match.objects.filter(home2=user_profile) | Match.objects.filter(away1=user_profile) | Match.objects.filter(away2=user_profile)
+            serializer = MatchSerializer(user_matches, many=True)
+            
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except UserProfile.DoesNotExist:
+            return Response({"error": f"User {user} not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
