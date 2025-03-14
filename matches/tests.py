@@ -4,8 +4,8 @@ from rest_framework import status
 from django.contrib.auth import get_user_model
 from users.models import UserProfile
 from rest_framework.authtoken.models import Token
-from matches.models import Match, MatchMoment, MatchSet
-from matches.match import TennisMatch, Game, Set, Tiebreak
+from matches.models import Match, MatchMoment
+from matches.match import TennisMatch,  Tiebreak
 
 User = get_user_model()
 
