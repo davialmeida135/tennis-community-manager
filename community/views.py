@@ -6,6 +6,8 @@ from django.db import transaction
 from .models import Community, CommunityUsers
 from users.models import UserProfile
 from .serializers import CommunitySerializer, CommunityUsersSerializer
+from tournament.serializers import TournamentSerializer
+from tournament.models import Tournament
 from django.contrib.auth import get_user_model
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -35,9 +37,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
             return Response(
                 {"error": "Usuário não existe."},
                 status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        
+            ) 
 
         # Se necessário, você pode verificar se o usuário já pertence à comunidade
         CommunityUsers.objects.create(
@@ -49,3 +49,23 @@ class CommunityViewSet(viewsets.ModelViewSet):
             {"message": "Usuário adicionado com sucesso"},
             status=status.HTTP_201_CREATED
         )
+    @action(detail=True, methods=["get"])
+    def tournaments(self, request, pk=None):
+        """Return all tournaments for this community."""
+        community = self.get_object()
+        tournaments = Tournament.objects.filter(community_id=community)
+        serializer = TournamentSerializer(tournaments, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="tournaments/(?P<tournament_id>[^/.]+)")
+    def tournament_detail(self, request, pk=None, tournament_id=None):
+        """Return specific tournament details from this community."""
+        try:
+            tournament = Tournament.objects.get(tournament_id=tournament_id, community_id = pk)
+            serializer = TournamentSerializer(tournament)
+            return Response(serializer.data)
+        except Tournament.DoesNotExist:
+            return Response(
+                {"error": f"Tournament {tournament_id} not found in this community"},
+                status=status.HTTP_404_NOT_FOUND
+            )
