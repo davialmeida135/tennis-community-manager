@@ -7,6 +7,6 @@ router.register(r'communities', CommunityViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('communities/add_user/', views.CommunityViewSet.as_view({'post': 'add_user'}), name='add_user'),
+    path('add_user', views.CommunityViewSet.add_user, name='add_user'),
     ]
 

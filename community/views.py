@@ -49,6 +49,15 @@ class CommunityViewSet(viewsets.ModelViewSet):
             {"message": "Usuário adicionado com sucesso"},
             status=status.HTTP_201_CREATED
         )
+    
+    @action(detail=True, methods=["get"])
+    def users(self, request, pk=None):
+        """Return all users for this community."""
+        community = self.get_object()
+        users = CommunityUsers.objects.filter(community_id=community)
+        serializer = CommunityUsersSerializer(users, many=True)
+        return Response(serializer.data)
+    
     @action(detail=True, methods=["get"])
     def tournaments(self, request, pk=None):
         """Return all tournaments for this community."""
