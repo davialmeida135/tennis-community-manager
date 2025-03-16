@@ -154,6 +154,23 @@ class TournamentViewSet(viewsets.ModelViewSet):
         player = TournamentPlayer.objects.create(tournament=tournament, user=user)
         serializer = TournamentPlayerSerializer(player)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=["post"])
+    def remove_player(self, request, pk=None):
+        """
+        Remove um jogador de um torneio.
+        """
+        tournament = self.get_object()
+        action_user = request.user
+        user_id = request.data.get("user_id")
+        print(f"User {action_user} is trying to remove user {user_id} from tournament {pk}")
+
+        player = TournamentPlayer.objects.filter(tournament=tournament, user=user_id)
+        if not player.exists():
+            return Response({"error": "O jogador não está inscrito no torneio"}, status=status.HTTP_400_BAD_REQUEST)
+
+        player.delete()
+        return Response({"message": "Jogador removido com sucesso"}, status=status.HTTP_200_OK)
 
 class TournamentPlayerViewSet(viewsets.ModelViewSet):
     queryset = TournamentPlayer.objects.all()
