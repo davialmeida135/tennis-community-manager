@@ -8,6 +8,7 @@ from users.models import UserProfile
 from .serializers import CommunitySerializer, CommunityUsersSerializer
 from tournament.serializers import TournamentSerializer
 from tournament.models import Tournament
+from tournament.views import TournamentViewSet
 from django.contrib.auth import get_user_model
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -40,11 +41,19 @@ class CommunityViewSet(viewsets.ModelViewSet):
             ) 
 
         # Se necessário, você pode verificar se o usuário já pertence à comunidade
+        membership = CommunityUsers.objects.filter(
+            community=community,
+            user=user_profile
+        )
+        if membership.exists():
+            return Response(
+                {"error": "Usuário já pertence à comunidade."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         CommunityUsers.objects.create(
             community=community,
             user=user_profile,  # associa o usuário existente
         )
-
         return Response(
             {"message": "Usuário adicionado com sucesso"},
             status=status.HTTP_201_CREATED
@@ -88,6 +97,42 @@ class CommunityViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK
         )
     
+    @action(detail=True, methods=["post"])
+    def edit_user_permissions(self, request, pk=None):
+        """
+        Edita as permissões de um usuário na comunidade.
+        """
+        community = self.get_object()
+        user_id = request.data.get("id")
+        role = request.data.get("role")
+
+        try:
+            # Verifica se o usuário existe
+            user = User.objects.get(pk=user_id)
+            user_profile = UserProfile.objects.get(user=user)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "Usuário não existe."},
+                status=status.HTTP_400_BAD_REQUEST
+            ) 
+
+        # Se necessário, você pode verificar se o usuário pertence à comunidade
+        membership = CommunityUsers.objects.filter(
+            community=community,
+            user=user_profile
+        )
+        if not membership.exists():
+            return Response(
+                {"error": "Usuário não pertence à comunidade."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        membership.update(role=role)
+
+        return Response(
+            {"message": f"Permissões do usuário {user_id} atualizadas com sucesso"},
+            status=status.HTTP_200_OK
+        )
+    
     @action(detail=True, methods=["get"])
     def users(self, request, pk=None):
         """Return all users for this community."""
@@ -103,16 +148,4 @@ class CommunityViewSet(viewsets.ModelViewSet):
         tournaments = Tournament.objects.filter(community_id=community)
         serializer = TournamentSerializer(tournaments, many=True)
         return Response(serializer.data)
-
-    @action(detail=True, methods=["get"], url_path="tournaments/(?P<tournament_id>[^/.]+)")
-    def tournament_detail(self, request, pk=None, tournament_id=None):
-        """Return specific tournament details from this community."""
-        try:
-            tournament = Tournament.objects.get(tournament_id=tournament_id, community_id = pk)
-            serializer = TournamentSerializer(tournament)
-            return Response(serializer.data)
-        except Tournament.DoesNotExist:
-            return Response(
-                {"error": f"Tournament {tournament_id} not found in this community"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+    
