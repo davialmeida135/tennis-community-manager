@@ -187,6 +187,33 @@ class TournamentViewSet(viewsets.ModelViewSet):
         player.delete()
         return Response({"message": "Jogador removido com sucesso"}, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=["get"])
+    def matches(self, request, pk=None):
+        """
+        Retorna todas as partidas de um torneio.
+        """
+        tournament = self.get_object()
+        matches = TournamentMatch.objects.filter(tournament=tournament)
+        serializer = TournamentMatchSerializer(matches, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="matches/(?P<match_id>[^/.]+)")
+    def match_detail(self, request, pk=None, match_id=None):
+        """
+        Retorna os detalhes de uma partida específica do torneio.
+        """
+        tournament = self.get_object()
+        
+        try:
+            match = Match.objects.get(match_id=match_id)
+            match = TournamentMatch.objects.get(match=match)
+            serializer = TournamentMatchSerializer(match)
+            return Response(serializer.data)
+        except TournamentMatch.DoesNotExist:
+            return Response({"error": "Match not found in tournament"}, status=status.HTTP_404_NOT_FOUND)
+    
+    
+
 class TournamentPlayerViewSet(viewsets.ModelViewSet):
     queryset = TournamentPlayer.objects.all()
     serializer_class = TournamentPlayerSerializer
