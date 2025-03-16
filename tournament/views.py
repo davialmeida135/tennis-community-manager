@@ -135,6 +135,21 @@ class TournamentViewSet(viewsets.ModelViewSet):
         players = TournamentPlayer.objects.filter(tournament=tournament)
         serializer = TournamentPlayerSerializer(players, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="players/(?P<player_id>[^/.]+)")
+    def player_detail(self, request, pk=None, player_id=None):
+        """
+        Retorna os detalhes de um jogador específico do torneio.
+        """
+        tournament = self.get_object()
+        
+        try:
+            player = UserProfile.objects.get(id=player_id)
+            player = TournamentPlayer.objects.get(tournament=tournament, user=player)
+            serializer = TournamentPlayerSerializer(player)
+            return Response(serializer.data)
+        except TournamentPlayer.DoesNotExist:
+            return Response({"error": "Player not found in tournament"}, status=status.HTTP_404_NOT_FOUND)    
     
     # TODO Checagens de permissão/validação/torneio ja iniciou
     @action(detail=True, methods=["post"])

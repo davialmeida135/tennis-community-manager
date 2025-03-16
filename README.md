@@ -8,7 +8,7 @@
  
 ## TODO
 - Testar tudo no postman
-- GET Jogadores de um torneio
+- ~~GET Jogadores de um torneio~~
 - GET Partidas de um torneio
 - GET Jogador do torneio (Informações como seed, status da inscrição)
 - GET Partida do torneio (Informações como rodada)
