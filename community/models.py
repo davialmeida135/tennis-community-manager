@@ -27,6 +27,10 @@ class CommunityUsers(models.Model):
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="community_users")
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="community_entries")
     role = models.CharField(max_length=25, choices=ROLE_CHOICES, default="member")
-
+    
+    class Meta:
+        unique_together = ['community', 'user']  # Enforces uniqueness
+        verbose_name_plural = "Community Users"
+        
     def __str__(self):
         return f"{self.user.name} in {self.community.name}"

@@ -3,9 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
 from .models import Tournament, TournamentPlayer, TournamentMatch
+from users.models import UserProfile
 from matches.models import Match
-from .serializers import TournamentSerializer, TournamentPlayerSerializer, TournamentMatchSerializer
-import random
+from .serializers import TournamentPlayerSerializer, TournamentSerializer, TournamentMatchSerializer
 from .utils import seeding_order, fill_null_seeds, fit_players_in_bracket
 
 class TournamentViewSet(viewsets.ModelViewSet):
@@ -125,6 +125,94 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "Bracket gerado com sucesso"}, status=status.HTTP_201_CREATED)
 
+    # TODO Checagens de permissão/validação
+    @action(detail=True, methods=["get"])
+    def players(self, request, pk=None):
+        """
+        Retorna todos os jogadores inscritos em um torneio.
+        """
+        tournament = self.get_object()
+        players = TournamentPlayer.objects.filter(tournament=tournament)
+        serializer = TournamentPlayerSerializer(players, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="players/(?P<player_id>[^/.]+)")
+    def player_detail(self, request, pk=None, player_id=None):
+        """
+        Retorna os detalhes de um jogador específico do torneio.
+        """
+        tournament = self.get_object()
+        
+        try:
+            player = UserProfile.objects.get(id=player_id)
+            player = TournamentPlayer.objects.get(tournament=tournament, user=player)
+            serializer = TournamentPlayerSerializer(player)
+            return Response(serializer.data)
+        except TournamentPlayer.DoesNotExist:
+            return Response({"error": "Player not found in tournament"}, status=status.HTTP_404_NOT_FOUND)    
+    
+    # TODO Checagens de permissão/validação/torneio ja iniciou
+    @action(detail=True, methods=["post"])
+    def add_player(self, request, pk=None):
+        """
+        Adiciona um jogador a um torneio.
+        """
+        tournament = self.get_object()
+        action_user = request.user
+        user_id = request.data.get("user_id")
+        print(f"User {action_user} is trying to add user {user_id} to tournament {pk}")
+
+        if TournamentPlayer.objects.filter(tournament=tournament, user=user_id).exists():
+            return Response({"error": "O jogador já está inscrito no torneio"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = UserProfile.objects.get(pk=user_id)
+        player = TournamentPlayer.objects.create(tournament=tournament, user=user)
+        serializer = TournamentPlayerSerializer(player)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=["post"])
+    def remove_player(self, request, pk=None):
+        """
+        Remove um jogador de um torneio.
+        """
+        tournament = self.get_object()
+        action_user = request.user
+        user_id = request.data.get("user_id")
+        print(f"User {action_user} is trying to remove user {user_id} from tournament {pk}")
+
+        player = TournamentPlayer.objects.filter(tournament=tournament, user=user_id)
+        if not player.exists():
+            return Response({"error": "O jogador não está inscrito no torneio"}, status=status.HTTP_400_BAD_REQUEST)
+
+        player.delete()
+        return Response({"message": "Jogador removido com sucesso"}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"])
+    def matches(self, request, pk=None):
+        """
+        Retorna todas as partidas de um torneio.
+        """
+        tournament = self.get_object()
+        matches = TournamentMatch.objects.filter(tournament=tournament)
+        serializer = TournamentMatchSerializer(matches, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"], url_path="matches/(?P<match_id>[^/.]+)")
+    def match_detail(self, request, pk=None, match_id=None):
+        """
+        Retorna os detalhes de uma partida específica do torneio.
+        """
+        tournament = self.get_object()
+        
+        try:
+            match = Match.objects.get(match_id=match_id)
+            match = TournamentMatch.objects.get(match=match)
+            serializer = TournamentMatchSerializer(match)
+            return Response(serializer.data)
+        except TournamentMatch.DoesNotExist:
+            return Response({"error": "Match not found in tournament"}, status=status.HTTP_404_NOT_FOUND)
+    
+    
 
 class TournamentPlayerViewSet(viewsets.ModelViewSet):
     queryset = TournamentPlayer.objects.all()

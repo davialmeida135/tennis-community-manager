@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from .models import CommunityUsers, Community
 from users.models import UserProfile
+from users.serializers import SimpleUserProfileSerializer
 from django.db import transaction
 
 class CommunityUsersSerializer(serializers.ModelSerializer):
     role_display = serializers.CharField(source="get_role_display", read_only=True)
-
+    user = SimpleUserProfileSerializer(read_only=True)
     class Meta:
         model = CommunityUsers
         fields = "__all__"
