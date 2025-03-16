@@ -50,6 +50,44 @@ class CommunityViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED
         )
     
+    @action(detail=True, methods=["post"])
+    def remove_user(self, request, pk=None): # pk é o ID da comunidade
+        """
+        Remove um usuário da comunidade.
+        """
+        community = self.get_object()
+        user_id = request.data.get("id")
+
+        request_user = request.user.first_name
+        print(f"{request_user} is trying to remove user {user_id} from community {pk}")
+
+        try:
+            # Verifica se o usuário existe
+            user = User.objects.get(pk=user_id)
+            user_profile = UserProfile.objects.get(user=user)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "Usuário não existe."},
+                status=status.HTTP_400_BAD_REQUEST
+            ) 
+
+        # Se necessário, você pode verificar se o usuário pertence à comunidade
+        membership = CommunityUsers.objects.filter(
+            community=community,
+            user=user_profile
+        )
+        if not membership.exists():
+            return Response(
+                {"error": "Usuário não pertence à comunidade."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        membership.delete()
+
+        return Response(
+            {"message": f"Usuário removido da comunidade {pk} com sucesso"},
+            status=status.HTTP_200_OK
+        )
+    
     @action(detail=True, methods=["get"])
     def users(self, request, pk=None):
         """Return all users for this community."""
