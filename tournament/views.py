@@ -3,9 +3,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
 from .models import Tournament, TournamentPlayer, TournamentMatch
+from users.models import UserProfile
 from matches.models import Match
-from .serializers import TournamentSerializer, TournamentPlayerSerializer, TournamentMatchSerializer
-import random
 from .serializers import TournamentPlayerSerializer, TournamentSerializer, TournamentMatchSerializer
 from .utils import seeding_order, fill_null_seeds, fit_players_in_bracket
 
@@ -137,6 +136,24 @@ class TournamentViewSet(viewsets.ModelViewSet):
         serializer = TournamentPlayerSerializer(players, many=True)
         return Response(serializer.data)
     
+    # TODO Checagens de permissão/validação/torneio ja iniciou
+    @action(detail=True, methods=["post"])
+    def add_player(self, request, pk=None):
+        """
+        Adiciona um jogador a um torneio.
+        """
+        tournament = self.get_object()
+        action_user = request.user
+        user_id = request.data.get("user_id")
+        print(f"User {action_user} is trying to add user {user_id} to tournament {pk}")
+
+        if TournamentPlayer.objects.filter(tournament=tournament, user=user_id).exists():
+            return Response({"error": "O jogador já está inscrito no torneio"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = UserProfile.objects.get(pk=user_id)
+        player = TournamentPlayer.objects.create(tournament=tournament, user=user)
+        serializer = TournamentPlayerSerializer(player)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class TournamentPlayerViewSet(viewsets.ModelViewSet):
     queryset = TournamentPlayer.objects.all()
