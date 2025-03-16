@@ -6,6 +6,7 @@ from .models import Tournament, TournamentPlayer, TournamentMatch
 from matches.models import Match
 from .serializers import TournamentSerializer, TournamentPlayerSerializer, TournamentMatchSerializer
 import random
+from .serializers import TournamentPlayerSerializer, TournamentSerializer, TournamentMatchSerializer
 from .utils import seeding_order, fill_null_seeds, fit_players_in_bracket
 
 class TournamentViewSet(viewsets.ModelViewSet):
@@ -125,6 +126,17 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
         return Response({"message": "Bracket gerado com sucesso"}, status=status.HTTP_201_CREATED)
 
+    # TODO Checagens de permissão/validação
+    @action(detail=True, methods=["get"])
+    def players(self, request, pk=None):
+        """
+        Retorna todos os jogadores inscritos em um torneio.
+        """
+        tournament = self.get_object()
+        players = TournamentPlayer.objects.filter(tournament=tournament)
+        serializer = TournamentPlayerSerializer(players, many=True)
+        return Response(serializer.data)
+    
 
 class TournamentPlayerViewSet(viewsets.ModelViewSet):
     queryset = TournamentPlayer.objects.all()
