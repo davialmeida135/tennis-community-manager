@@ -4,8 +4,8 @@ from .views import TournamentMatchViewSet, TournamentPlayerViewSet, TournamentVi
 from . import views
 router = DefaultRouter()
 router.register(r'tournament', TournamentViewSet)
-router.register(r'tournament-player', TournamentPlayerViewSet)
-router.register(r'tournament-match', TournamentMatchViewSet)
+router.register(r'tournament_player', TournamentPlayerViewSet)
+router.register(r'tournament_match', TournamentMatchViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
