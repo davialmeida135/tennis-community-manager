@@ -22,6 +22,9 @@ class TournamentViewSet(viewsets.ModelViewSet):
 
         if len(players) < 2:
             return Response({"error": "Pelo menos 2 jogadores são necessários"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Remove todas as partidas existentes deste torneio antes de gerar o novo bracket
+        TournamentMatch.objects.filter(tournament=tournament).delete()
 
         # Garantir que o número máximo de jogadores seja uma potência de 2
         bracket_size = 2
@@ -90,12 +93,20 @@ class TournamentViewSet(viewsets.ModelViewSet):
                         m2_bye = None
                         if not m1.match.home1:
                             m1_bye = m1.match.away1
+                            m1.match.winner1 = m1_bye
+                            m1.match.save()
                         elif not m1.match.away1:
                             m1_bye = m1.match.home1
+                            m1.match.winner1 = m1_bye
+                            m1.match.save()
                         if not m2.match.home1:
                             m2_bye = m2.match.away1
+                            m2.match.winner1 = m2_bye
+                            m2.match.save()
                         elif not m2.match.away1:
                             m2_bye = m2.match.home1
+                            m2.match.winner1 = m2_bye
+                            m2.match.save()
                         
                         match = Match.objects.create(
                                 home1 = m1_bye,
@@ -107,7 +118,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
                             community_id=tournament.community_id,
                         )
         
-                    next_match = TournamentMatch.objects.create(
+                    next_tournament_match = TournamentMatch.objects.create(
                         match=match,
                         tournament=tournament,
                         match_number=match_number,
@@ -115,12 +126,12 @@ class TournamentViewSet(viewsets.ModelViewSet):
                     )
 
                     # Conectar partidas anteriores com a próxima
-                    m1.next_match = next_match
+                    m1.next_match = match
                     m1.save()
-                    m2.next_match = next_match
+                    m2.next_match = match
                     m2.save()
 
-                    next_round_matches.append(next_match)
+                    next_round_matches.append(next_tournament_match)
                     match_number += 1
 
         return Response({"message": "Bracket gerado com sucesso"}, status=status.HTTP_201_CREATED)
