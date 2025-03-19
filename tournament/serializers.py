@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Tournament, TournamentPlayer, TournamentMatch
 from matches.serializers import MatchSerializer
+from matches.models import Match
 from users.serializers import SimpleUserProfileSerializer
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -20,7 +21,7 @@ class TournamentPlayerSerializer(serializers.ModelSerializer):
 
 class TournamentMatchSerializer(serializers.ModelSerializer):
     match = MatchSerializer()  # Serializa os detalhes da partida
-    next_match_id = serializers.PrimaryKeyRelatedField(source='next_match', queryset=TournamentMatch.objects.all(), allow_null=True, required=False)
+    next_match_id = serializers.PrimaryKeyRelatedField(source='next_match', queryset=Match.objects.all(), allow_null=True, required=False)
 
     class Meta:
         model = TournamentMatch

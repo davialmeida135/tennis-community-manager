@@ -6,6 +6,8 @@ from django.db import transaction
 from matches.models import Match, MatchMoment, MatchSet
 from matches.serializers import MatchSerializer
 from matches.match import TennisMatch, Game, Set, Tiebreak
+from tournament.models import TournamentMatch
+from users.models import UserProfile
 import datetime
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -193,3 +195,52 @@ class MatchViewSet(viewsets.ModelViewSet):
                 }
             }
         }, status=status.HTTP_201_CREATED)
+    
+    @action(detail=True, methods=["post"])
+    def set_winner(self, request, pk=None):
+        """Set the winner of the match"""
+        try:
+            match = self.get_object()
+            winner_id = request.data.get("winner_id")
+
+            if not match:
+                return Response({"error": "Match not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            if not winner_id:
+                return Response({"error": "Winner ID must be provided"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            try:
+                home1_id = match.home1.user.id
+            except Exception as e:
+                home1_id = None
+            
+            try:
+                away1_id = match.away1.user.id
+            except Exception as e:
+                away1_id = None
+
+            if home1_id != winner_id and away1_id != winner_id:
+                return Response({"error": "Winner must be one of the players"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            winner_profile = UserProfile.objects.get(pk=winner_id)
+            # Set the winner of the match
+            match.winner1 = winner_profile
+            match.save()
+
+            # Checar se a partida é de torneio e passar jogador para a próxima rodada
+            tournament_match = TournamentMatch.objects.get(match=match)
+            if tournament_match:
+                next_match = tournament_match.next_match
+                if next_match:
+                    if next_match.home1 is None:
+                        next_match.home1 = winner_profile
+                    elif next_match.away1 is None:
+                        next_match.away1 = winner_profile
+                    next_match.save()
+                else:
+                    # TODO Campeão
+                    print("Parabens ganhou o torneio")
+            
+            return Response({"message": "Match winner set successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

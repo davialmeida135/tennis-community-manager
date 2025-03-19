@@ -19,6 +19,7 @@ class Tournament(models.Model):
     prize = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     subscription_until = models.DateTimeField(null=True, blank=True)
     rules = models.TextField(null=True, blank=True)
+    winner = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name="tournament_wins")
 
     def __str__(self):
         return self.name
@@ -50,7 +51,7 @@ class TournamentMatch(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name="matches")
     round = models.IntegerField()
     match_number = models.IntegerField()
-    next_match = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="previous_match")
+    next_match = models.ForeignKey(Match, on_delete=models.SET_NULL, null=True, blank=True, related_name="previous_match")
 
     def __str__(self):
         return f"Round {self.round} - Match {self.match_number}"
