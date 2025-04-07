@@ -14,6 +14,7 @@ class TennisMatch:
         self.game_goal = game_goal
         self.ad = ad
         self.title = f"{home1} x {away1} : {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        self.winner = None
 
     def to_dict(self):
         return {
@@ -128,7 +129,7 @@ class TennisMatch:
         if self.match_moment.current_set.home1_score == self.game_goal and self.match_moment.current_set.away1_score == self.game_goal:
             self.match_moment.current_game = Tiebreak()
 
-        if self.match_moment.match_score_h1 == self.best_of or self.match_moment.match_score_a1 == self.best_of:
+        if self.match_moment.match_score_h1 > self.best_of/2 or self.match_moment.match_score_a1 > self.best_of/2:
             self.end_match()
 
     def update_tiebreak(self, player):
