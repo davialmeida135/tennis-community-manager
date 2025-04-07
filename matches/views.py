@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status
+import json
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db import transaction
@@ -135,6 +136,7 @@ class MatchViewSet(viewsets.ModelViewSet):
         # Update match winner if match is complete
         if tennis_match.match_moment.match_score_h1 > match.max_sets / 2:
             match.winner1 = match.home1
+            self.set_winner(request = json.dumps({"winner_id": match.home1.user.id}), pk=pk)
             match.save()
             
         return Response({
@@ -176,6 +178,7 @@ class MatchViewSet(viewsets.ModelViewSet):
         # Update match winner if match is complete
         if tennis_match.match_moment.match_score_a1 > match.max_sets / 2:
             match.winner1 = match.away1
+            self.set_winner(request = json.dumps({"winner_id": match.away1.user.id}), pk=pk)
             match.save()
             
         return Response({
