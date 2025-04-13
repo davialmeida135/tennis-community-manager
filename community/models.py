@@ -20,8 +20,8 @@ class CommunityUsers(models.Model):
         ("moderator", "Moderator"),
         ("admin", "Admin"),   
         ("owner", "Owner"),
-        ("pending admin acceptance", "Pending Admin Acceptance"),
-        ("pending invitation", "Pending Invitation"),
+        ("pending_invitation", "Pending Invitation"),
+        ("pending_request", "Pending Request"),   
     ]
 
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="community_users")

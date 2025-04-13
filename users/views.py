@@ -11,48 +11,25 @@ from community.models import Community, CommunityUsers
 from community.serializers import CommunitySerializer
 from matches.models import Match
 from matches.serializers import MatchSerializer
-
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication # If needed explicitly
 
 User = get_user_model()
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # Add authentication and permission classes
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # Default auth/permissions are now handled by settings.py
+    # authentication_classes = [JWTAuthentication] # Usually not needed here
+    # permission_classes = [IsAuthenticated] # Usually not needed here
 
-    # If you want to allow unauthenticated users to register
     def get_permissions(self):
-        """Allow unauthenticated users to create a new account"""
-        if self.action in ['create', 'login']:
-            return []
+        """Allow unauthenticated users to create a new account (register)."""
+        # Allow anyone to create a user
+        if self.action == 'create':
+            return [] # Use AllowAny permission
+        # For all other actions, use the default (IsAuthenticated)
         return super().get_permissions()
 
-    @action(detail=False, methods=["post"])
-    def login(self, request):
-        """Autentica um usuário e retorna um token."""
-        email = request.data.get("email")
-        password = request.data.get("password")
-        try:
-            user = User.objects.get(email=email)
-            if check_password(password, user.password):
-                token, created = Token.objects.get_or_create(user=user)
-                return Response({"token": token.key, "user_id": user.id, "username": user.username}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
-        except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-    @action(detail=False, methods=["post"])
-    def logout(self, request):
-        """Realiza logout removendo o token do usuário."""
-        if request.user.is_authenticated:
-            request.user.auth_token.delete()
-            return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        return Response({"error": "Not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
     
     @action(detail=False, methods=["get"])
     def communities(self, request):

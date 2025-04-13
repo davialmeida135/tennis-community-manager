@@ -176,7 +176,11 @@ class TournamentViewSet(viewsets.ModelViewSet):
         if TournamentPlayer.objects.filter(tournament=tournament, user=user_id).exists():
             return Response({"error": "O jogador já está inscrito no torneio"}, status=status.HTTP_400_BAD_REQUEST)
 
+        community = tournament.community_id
         user = UserProfile.objects.get(pk=user_id)
+        if not community.community_users.filter(user=user).exists():
+            return Response({"error": "Você não é membro da comunidade"}, status=status.HTTP_403_FORBIDDEN)
+        
         player = TournamentPlayer.objects.create(tournament=tournament, user=user)
         serializer = TournamentPlayerSerializer(player)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

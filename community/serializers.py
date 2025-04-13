@@ -26,7 +26,7 @@ class CommunitySerializer(serializers.ModelSerializer):
             CommunityUsers.objects.create(
                 user=user,
                 community=community,
-                role="ADMIN"  
+                role="owner"
             )
             
             return community

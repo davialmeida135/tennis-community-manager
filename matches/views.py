@@ -10,13 +10,13 @@ from matches.match import TennisMatch, Game, Set, Tiebreak
 from tournament.models import TournamentMatch
 from users.models import UserProfile
 import datetime
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsPlayerInMatchOrCommunityAdmin
+
 
 class MatchViewSet(viewsets.ModelViewSet):
     queryset = Match.objects.all()
     serializer_class = MatchSerializer
-    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def _get_latest_moment(self, match):
@@ -102,7 +102,7 @@ class MatchViewSet(viewsets.ModelViewSet):
                 
             return match_moment
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=[IsPlayerInMatchOrCommunityAdmin])
     def start_match(self, request, pk=None):
         """Initialize a new match with proper tennis scoring"""
         match = self.get_object()
@@ -115,7 +115,7 @@ class MatchViewSet(viewsets.ModelViewSet):
         
         return Response({"message": "Match started successfully"}, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=[IsPlayerInMatchOrCommunityAdmin])
     def point_home(self, request, pk=None):
         """Add point for home player using proper tennis logic"""
         match = self.get_object()
@@ -157,7 +157,7 @@ class MatchViewSet(viewsets.ModelViewSet):
             }
         }, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=[IsPlayerInMatchOrCommunityAdmin])
     def point_away(self, request, pk=None):
         """Add point for away player using proper tennis logic"""
         match = self.get_object()
@@ -199,8 +199,8 @@ class MatchViewSet(viewsets.ModelViewSet):
             }
         }, status=status.HTTP_201_CREATED)
     
-    @action(detail=True, methods=["post"])
-    def set_winner(self, request, pk=None):
+    @action(detail=True, methods=["post"], permission_classes=[IsPlayerInMatchOrCommunityAdmin])
+    def set_winner(self, request, pk=None, ):
         """Set the winner of the match"""
         try:
             match = self.get_object()
