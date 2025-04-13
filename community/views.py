@@ -22,7 +22,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
     def invite_user(self, request, pk=None):
         """Invites a user to join the community."""
         community = self.get_object()
-        user_id_to_invite = request.data.get("user_id")
+        user_id_to_invite = request.data.get("id")
 
         if not user_id_to_invite:
             return Response({"error": "User ID must be provided"}, status=status.HTTP_400_BAD_REQUEST)
@@ -154,7 +154,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
         user_id = request.data.get("id")
 
         request_user = request.user.first_name
-        print(f"{request_user} is trying to remove user {user_id} from community {pk}")
+        #print(f"{request_user} is trying to remove user {user_id} from community {pk}")
 
         try:
             # Verifica se o usuário existe

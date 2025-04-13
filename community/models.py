@@ -33,4 +33,4 @@ class CommunityUsers(models.Model):
         verbose_name_plural = "Community Users"
         
     def __str__(self):
-        return f"{self.user.name} in {self.community.name}"
+        return f"{self.user.user.username} in {self.community.name} ({self.role})"

@@ -170,7 +170,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
         """
         tournament = self.get_object()
         action_user = request.user
-        user_id = request.data.get("user_id")
+        user_id = request.data.get("id")
         print(f"User {action_user} is trying to add user {user_id} to tournament {pk}")
 
         if TournamentPlayer.objects.filter(tournament=tournament, user=user_id).exists():
@@ -192,7 +192,7 @@ class TournamentViewSet(viewsets.ModelViewSet):
         """
         tournament = self.get_object()
         action_user = request.user
-        user_id = request.data.get("user_id")
+        user_id = request.data.get("id")
         print(f"User {action_user} is trying to remove user {user_id} from tournament {pk}")
 
         player = TournamentPlayer.objects.filter(tournament=tournament, user=user_id)
