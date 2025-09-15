@@ -44,9 +44,7 @@ class CommunityViewSet(viewsets.ModelViewSet):
             # Relationship exists, check its status
             if existing_relation.role not in ['pending_invitation', 'pending_request']:
                  return Response({"error": "User is already a member or has a pending request."}, status=status.HTTP_400_BAD_REQUEST)
-            # If it was a pending_request, maybe upgrade to pending_invitation? Or just inform?
-            # For simplicity, let's just say it's already pending if not created.
-            # If it already was pending_invitation, maybe resend? For now, just return success.
+
             existing_relation.role = 'pending_invitation' # Ensure it's set/reset to invitation
             existing_relation.save()
 
@@ -154,7 +152,6 @@ class CommunityViewSet(viewsets.ModelViewSet):
         user_id = request.data.get("id")
 
         request_user = request.user.first_name
-        #print(f"{request_user} is trying to remove user {user_id} from community {pk}")
 
         try:
             # Verifica se o usuário existe
@@ -238,13 +235,13 @@ class CommunityViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         """Set permissions based on action"""
         if self.action in ['update', 'partial_update', 'destroy']:
-            # Example: Only admins can modify/delete a community
+
             self.permission_classes = [IsCommunityAdmin]
         elif self.action == 'retrieve':
-            # Example: Any authenticated user can view details (or use IsCommunityMember)
+
             self.permission_classes = [IsAuthenticated]
         elif self.action == 'list':
-             # Example: Any authenticated user can list communities
+
             self.permission_classes = [IsAuthenticated]
         # For 'create', IsAuthenticated is applied by default from settings
         # For custom actions, permissions are set via the decorator
